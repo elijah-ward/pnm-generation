@@ -146,10 +146,6 @@ int main(int argc, char **argv) {
     struct PGM_Image pgmImage;
     struct PPM_Image ppmImage;
 
-    for ( int idx = 0; idx < argc; idx++) {
-        puts(argv[idx]);
-    }
-
     type = atoi(argv[1]);
     width = atoi(argv[2]);
     height = atoi(argv[3]);
