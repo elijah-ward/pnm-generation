@@ -118,8 +118,57 @@ int generate_pbm( struct PBM_Image * pbmImage, int width, int height, char* out_
 }
 
 int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_filename, int format ) {
+    int row, col;
+    int quarterWidth = width / 4;
+    int quarterHeight = height / 4;
+    int colour = 0;
 
     create_PGM_Image( pgmImage, width, height, MAX_GRAY );
+
+    int isWide = width >= height;
+    int strokeStart, strokeEnd, strokeLength;
+
+    strokeStart = 0;
+
+    for ( row = 0; row < pgmImage->height; row++ ) {
+        for ( col = 0; col < pgmImage->width; col++ ) {
+            if ( row >= quarterHeight && row < (quarterHeight * 3) && col >= quarterWidth && col < (quarterWidth * 3) ) {
+                colour = MAX_GRAY;
+            } else {
+                colour = 0;
+            }
+            pgmImage->image[row][col] = colour;
+        }
+    }
+
+    if ( isWide ) {
+        strokeLength = width/height;
+        strokeEnd = strokeLength;
+        for ( row = 0; row < pgmImage->height; row++ ) {
+            for ( col = 0; col < pgmImage->width; col++ ) {
+                if( col >= strokeStart && col < strokeEnd ) {
+                    pgmImage->image[row][col] = 1;
+                    pgmImage->image[row][width-col-1] = 1;
+                }
+            }
+            strokeStart = strokeEnd;
+            strokeEnd += strokeLength;
+        }
+    } else {
+        strokeLength = height/width;
+        strokeEnd = strokeLength;
+        for ( col = 0; col < pgmImage->width; col++ ) {
+            for ( row = 0; row < pgmImage->height; row++ ) {
+                if( row >= strokeStart && row < strokeEnd ) {
+                    pgmImage->image[row][col] = 0;
+                    pgmImage->image[height-row-1][col] = 0;
+                }
+            }
+            strokeStart = strokeEnd;
+            strokeEnd += strokeLength;
+        }
+    }
+
     save_PGM_Image( pgmImage, out_filename, format );
     free_PGM_Image( pgmImage );
 
