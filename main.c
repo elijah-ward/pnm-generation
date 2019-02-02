@@ -8,7 +8,14 @@ int main(int argc, char **argv) {
     int type, height, width, format;
     char **output_name;
 
-    for ( idx=0; idx < argc; idx++){
+    int type, width, height, format;
+    char *out_filename;
+
+    struct PBM_Image pbmImage;
+    struct PGM_Image pgmImage;
+    struct PPM_Image ppmImage;
+
+    for ( int idx = 0; idx < argc; idx++) {
         puts(argv[idx]);
     }
 }
