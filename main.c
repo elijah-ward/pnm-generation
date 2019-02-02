@@ -58,8 +58,58 @@ int check_args(int type, int width, int height, char *out_filename, int format) 
 }
 
 int generate_pbm( struct PBM_Image * pbmImage, int width, int height, char* out_filename, int format ) {
+    int row, col;
+    int quarterWidth = width / 4;
+    int quarterHeight = height / 4;
+    int colour = 0;
 
     create_PBM_Image( pbmImage, width, height );
+
+    int isWide = width >= height;
+    int strokeStart, strokeEnd, strokeLength;
+
+    strokeStart = 0;
+
+    for ( row = 0; row < pbmImage->height; row++ ) {
+        for ( col = 0; col < pbmImage->width; col++ ) {
+            if ( row >= quarterHeight && row < (quarterHeight * 3) && col >= quarterWidth && col < (quarterWidth * 3) ) {
+                colour = 0;
+            } else {
+                colour = 1;
+            }
+            pbmImage->image[row][col] = colour;
+        }
+    }
+
+    if ( isWide ) {
+        strokeLength = width/height;
+        strokeEnd = strokeLength;
+        for ( row = 0; row < pbmImage->height; row++ ) {
+            for ( col = 0; col < pbmImage->width; col++ ) {
+                if( col >= strokeStart && col < strokeEnd ) {
+                    pbmImage->image[row][col] = 1;
+                    pbmImage->image[row][width-col-1] = 1;
+                }
+            }
+            strokeStart = strokeEnd;
+            strokeEnd += strokeLength;
+        }
+    } else {
+        strokeLength = height/width;
+        strokeEnd = strokeLength;
+        for ( col = 0; col < pbmImage->width; col++ ) {
+            for ( row = 0; row < pbmImage->height; row++ ) {
+                if( row >= strokeStart && row < strokeEnd ) {
+                    pbmImage->image[row][col] = 1;
+                    pbmImage->image[height-row-1][col] = 1;
+                }
+            }
+            strokeStart = strokeEnd;
+            strokeEnd += strokeLength;
+        }
+    }
+
+    puts("done!");
     save_PBM_Image( pbmImage, out_filename, format );
     free_PBM_Image( pbmImage );
 
