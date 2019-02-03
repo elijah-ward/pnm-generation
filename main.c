@@ -260,9 +260,71 @@ int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_
 
 }
 
+/* function: generate_ppm */
+
 int generate_ppm( struct PPM_Image * ppmImage, int width, int height, char* out_filename, int format ) {
 
     create_PPM_Image( ppmImage, width, height, MAX_GRAY );
+
+    int thirdWidth = width/3;
+    int halfWidth = width/2;
+    int halfHeight = height/2;
+
+    float gradient = (float) MAX_GRAY/halfHeight;
+
+    float rShade = 0;
+    float gShade = MAX_GRAY;
+    float bShade = 0;
+
+    float upShade = 0;
+    float downShade = MAX_GRAY;
+
+
+    // Colour Gradients on Upper Half
+    for ( int row = 0; row < halfHeight; row++ ) {
+        for ( int col = 0; col < thirdWidth; col++ ) {
+
+            // red gradient
+            ppmImage->image[row][col][0] = MAX_GRAY;
+            ppmImage->image[row][col][1] = rShade;
+            ppmImage->image[row][col][2] = rShade;
+
+            // green gradient
+            ppmImage->image[row][col+thirdWidth][0] = gShade;
+            ppmImage->image[row][col+thirdWidth][1] = MAX_GRAY;
+            ppmImage->image[row][col+thirdWidth][2] = gShade;
+
+            // blue gradient
+            ppmImage->image[row][col+(thirdWidth*2)][0] = bShade;
+            ppmImage->image[row][col+(thirdWidth*2)][1] = bShade;
+            ppmImage->image[row][col+(thirdWidth*2)][2] = MAX_GRAY;
+
+        }
+        rShade += gradient;
+        gShade -= gradient;
+        bShade += gradient;
+    }
+
+    // Gray Gradients on Lower Half
+    for ( int row = halfHeight; row < height; row++ ) {
+        for ( int col = 0; col < halfWidth; col++ ) {
+
+            // black to white, top to bottom
+            ppmImage->image[row][col][0] = upShade;
+            ppmImage->image[row][col][1] = upShade;
+            ppmImage->image[row][col][2] = upShade;
+
+            // white to black, top to bottom
+            ppmImage->image[row][col+halfWidth][0] = downShade;
+            ppmImage->image[row][col+halfWidth][1] = downShade;
+            ppmImage->image[row][col+halfWidth][2] = downShade;
+
+        }
+        upShade += gradient;
+        downShade -= gradient;
+    }
+
+
     save_PPM_Image( ppmImage, out_filename, format );
     free_PPM_Image( ppmImage );
 
