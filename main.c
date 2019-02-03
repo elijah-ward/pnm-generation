@@ -99,7 +99,7 @@ int generate_pbm( struct PBM_Image * pbmImage, int width, int height, char* out_
         strokeEnd = strokeLength;
         for ( col = 0; col < pbmImage->width; col++ ) {
             for ( row = 0; row < pbmImage->height; row++ ) {
-                if( row >= strokeStart && row < strokeEnd ) {
+                if ( row >= strokeStart && row < strokeEnd ) {
                     pbmImage->image[row][col] = 1;
                     pbmImage->image[height-row-1][col] = 1;
                 }
@@ -118,20 +118,25 @@ int generate_pbm( struct PBM_Image * pbmImage, int width, int height, char* out_
 }
 
 int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_filename, int format ) {
-    int row, col;
     int quarterWidth = width / 4;
     int quarterHeight = height / 4;
     int colour = 0;
+    int longDim, shortDim;
+
+    if ( width > height ) {
+        longDim = width;
+        shortDim = height;
+    } else {
+        longDim = height;
+        shortDim = width;
+    }
 
     create_PGM_Image( pgmImage, width, height, MAX_GRAY );
 
     int isWide = width >= height;
-    int strokeStart, strokeEnd, strokeLength;
 
-    strokeStart = 0;
-
-    for ( row = 0; row < pgmImage->height; row++ ) {
-        for ( col = 0; col < pgmImage->width; col++ ) {
+    for ( int row = 0; row < pgmImage->height; row++ ) {
+        for ( int col = 0; col < pgmImage->width; col++ ) {
             if ( row >= quarterHeight && row < (quarterHeight * 3) && col >= quarterWidth && col < (quarterWidth * 3) ) {
                 colour = MAX_GRAY;
             } else {
@@ -141,33 +146,63 @@ int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_
         }
     }
 
-    if ( isWide ) {
-        strokeLength = width/height;
-        strokeEnd = strokeLength;
-        for ( row = 0; row < pgmImage->height; row++ ) {
-            for ( col = 0; col < pgmImage->width; col++ ) {
-                if( col >= strokeStart && col < strokeEnd ) {
-                    pgmImage->image[row][col] = 1;
-                    pgmImage->image[row][width-col-1] = 1;
+    if (isWide){
+        // top and bottom triangles
+        int vEdgeStart, vEdgeEnd, vEdgeLength;
+        float vShade, vGradient;
+
+        vEdgeStart = quarterWidth;
+        vEdgeLength = width/height;
+        vEdgeEnd = vEdgeStart + vEdgeLength;
+        vShade = (float) MAX_GRAY;
+        vGradient = (float) MAX_GRAY/quarterHeight;
+
+        for ( int row = quarterHeight; row < (quarterHeight * 2); row++ ) {
+            for ( int col = quarterWidth; col < (quarterWidth * 2); col++ ) {
+                if ( col >= vEdgeStart ) {
+                    pgmImage->image[row][width-col-1] = vShade;
+                    pgmImage->image[height-row-1][width-col-1] = vShade;
+                    pgmImage->image[row][col] = vShade;
+                    pgmImage->image[height-row-1][col] = vShade;
                 }
             }
-            strokeStart = strokeEnd;
-            strokeEnd += strokeLength;
+            printf("vShade: %f\n", vShade);
+            vShade -= vGradient;
+            vEdgeStart = vEdgeEnd;
+            vEdgeEnd += vEdgeLength;
         }
-    } else {
-        strokeLength = height/width;
-        strokeEnd = strokeLength;
-        for ( col = 0; col < pgmImage->width; col++ ) {
-            for ( row = 0; row < pgmImage->height; row++ ) {
-                if( row >= strokeStart && row < strokeEnd ) {
-                    pgmImage->image[row][col] = 0;
-                    pgmImage->image[height-row-1][col] = 0;
+
+        // left and right triangles
+        float hEdgeStart, hEdgeEnd, fHeight, fWidth;
+        float hShade, hGradient, hEdgeLength;
+
+        fHeight = (float) height;
+        fWidth = (float) width;
+        hEdgeStart = quarterHeight;
+        hEdgeLength = fHeight/fWidth;
+        hEdgeEnd =  hEdgeStart + hEdgeLength;
+        hShade = (float) MAX_GRAY;
+        hGradient = (float) MAX_GRAY/quarterWidth;
+
+        for ( int col = quarterWidth; col < (quarterWidth * 2); col++ ) {
+            for ( int row = quarterHeight; row < (quarterHeight * 2); row++ ) {
+                if ( row >= (int) hEdgeStart ) {
+                    printf("col: %d, row: %d, hEdgeLength: %f, hEdgeStart: %f\n", col, row, hEdgeLength, hEdgeStart);
+                    pgmImage->image[row][width-col-1] = hShade;
+                    pgmImage->image[height-row-1][width-col-1] = hShade;
+                    pgmImage->image[row][col] = hShade;
+                    pgmImage->image[height-row-1][col] = hShade;
                 }
             }
-            strokeStart = strokeEnd;
-            strokeEnd += strokeLength;
+            hShade -= hGradient;
+            hEdgeStart = hEdgeEnd;
+            hEdgeEnd += hEdgeLength;
         }
     }
+
+
+
+    puts("done!");
 
     save_PGM_Image( pgmImage, out_filename, format );
     free_PGM_Image( pgmImage );
