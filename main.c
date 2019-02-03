@@ -198,6 +198,58 @@ int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_
             hEdgeStart = hEdgeEnd;
             hEdgeEnd += hEdgeLength;
         }
+    } else {
+        // top and bottom triangles
+        int vEdgeStart, vEdgeEnd, vEdgeLength;
+        float vShade, vGradient;
+
+        vEdgeStart = quarterHeight;
+        vEdgeLength = height/width;
+        vEdgeEnd = vEdgeStart + vEdgeLength;
+        vShade = (float) MAX_GRAY;
+        vGradient = (float) MAX_GRAY/quarterWidth;
+
+        for ( int col = quarterWidth; col < (quarterWidth * 2); col++ ) {
+            for ( int row = quarterHeight; row < (quarterHeight * 2); row++ ) {
+                if ( row >= vEdgeStart ) {
+                    pgmImage->image[row][width-col-1] = vShade;
+                    pgmImage->image[height-row-1][width-col-1] = vShade;
+                    pgmImage->image[row][col] = vShade;
+                    pgmImage->image[height-row-1][col] = vShade;
+                }
+            }
+            printf("vShade: %f\n", vShade);
+            vShade -= vGradient;
+            vEdgeStart = vEdgeEnd;
+            vEdgeEnd += vEdgeLength;
+        }
+
+        // left and right triangles
+        float hEdgeStart, hEdgeEnd, fHeight, fWidth;
+        float hShade, hGradient, hEdgeLength;
+
+        fHeight = (float) height;
+        fWidth = (float) width;
+        hEdgeStart = quarterWidth;
+        hEdgeLength = fWidth/fHeight;
+        hEdgeEnd =  hEdgeStart + hEdgeLength;
+        hShade = (float) MAX_GRAY;
+        hGradient = (float) MAX_GRAY/quarterHeight;
+
+        for ( int row = quarterHeight; row < (quarterHeight * 2); row++ ) {
+            for ( int col = quarterWidth; col < (quarterWidth * 2); col++ ) {
+                if ( col >= (int) hEdgeStart ) {
+                    printf("col: %d, row: %d, hEdgeLength: %f, hEdgeStart: %f\n", col, row, hEdgeLength, hEdgeStart);
+                    pgmImage->image[row][width-col-1] = hShade;
+                    pgmImage->image[height-row-1][width-col-1] = hShade;
+                    pgmImage->image[row][col] = hShade;
+                    pgmImage->image[height-row-1][col] = hShade;
+                }
+            }
+            hShade -= hGradient;
+            hEdgeStart = hEdgeEnd;
+            hEdgeEnd += hEdgeLength;
+        }
     }
 
 
