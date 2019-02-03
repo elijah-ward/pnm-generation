@@ -6,6 +6,8 @@
 
 #define MAX_GRAY 255
 
+/* function: check_args */
+
 int check_args(int type, int width, int height, char *out_filename, int format) {
 
     int status = 0;
@@ -56,6 +58,8 @@ int check_args(int type, int width, int height, char *out_filename, int format) 
     return 0;
 
 }
+
+/* function: generate_pbm */
 
 int generate_pbm( struct PBM_Image * pbmImage, int width, int height, char* out_filename, int format ) {
     int row, col;
@@ -115,6 +119,8 @@ int generate_pbm( struct PBM_Image * pbmImage, int width, int height, char* out_
     return 0;
 
 }
+
+/* function: generate_pgm */
 
 int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_filename, int format ) {
     int quarterWidth = width / 4;
