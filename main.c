@@ -109,7 +109,6 @@ int generate_pbm( struct PBM_Image * pbmImage, int width, int height, char* out_
         }
     }
 
-    puts("done!");
     save_PBM_Image( pbmImage, out_filename, format );
     free_PBM_Image( pbmImage );
 
@@ -166,7 +165,6 @@ int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_
                     pgmImage->image[height-row-1][col] = vShade;
                 }
             }
-            printf("vShade: %f\n", vShade);
             vShade -= vGradient;
             vEdgeStart = vEdgeEnd;
             vEdgeEnd += vEdgeLength;
@@ -187,7 +185,6 @@ int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_
         for ( int col = quarterWidth; col < (quarterWidth * 2); col++ ) {
             for ( int row = quarterHeight; row < (quarterHeight * 2); row++ ) {
                 if ( row >= (int) hEdgeStart ) {
-                    printf("col: %d, row: %d, hEdgeLength: %f, hEdgeStart: %f\n", col, row, hEdgeLength, hEdgeStart);
                     pgmImage->image[row][width-col-1] = hShade;
                     pgmImage->image[height-row-1][width-col-1] = hShade;
                     pgmImage->image[row][col] = hShade;
@@ -218,7 +215,6 @@ int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_
                     pgmImage->image[height-row-1][col] = vShade;
                 }
             }
-            printf("vShade: %f\n", vShade);
             vShade -= vGradient;
             vEdgeStart = vEdgeEnd;
             vEdgeEnd += vEdgeLength;
@@ -239,7 +235,6 @@ int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_
         for ( int row = quarterHeight; row < (quarterHeight * 2); row++ ) {
             for ( int col = quarterWidth; col < (quarterWidth * 2); col++ ) {
                 if ( col >= (int) hEdgeStart ) {
-                    printf("col: %d, row: %d, hEdgeLength: %f, hEdgeStart: %f\n", col, row, hEdgeLength, hEdgeStart);
                     pgmImage->image[row][width-col-1] = hShade;
                     pgmImage->image[height-row-1][width-col-1] = hShade;
                     pgmImage->image[row][col] = hShade;
@@ -251,10 +246,6 @@ int generate_pgm( struct PGM_Image * pgmImage, int width, int height, char* out_
             hEdgeEnd += hEdgeLength;
         }
     }
-
-
-
-    puts("done!");
 
     save_PGM_Image( pgmImage, out_filename, format );
     free_PGM_Image( pgmImage );
