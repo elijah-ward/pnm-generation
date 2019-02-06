@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include "libpnm.h"
 
 #define MAX_GRAY 255
@@ -308,7 +309,7 @@ void generate_pgm( struct PGM_Image *pgmImage, int width, int height, char *out_
         float hEdgeStart, hEdgeEnd, fHeight, fWidth;
         float hShade, hGradient, hEdgeLength;
 
-        fHeight = (float) height;                           // height to calculate the ratio between height/width    
+        fHeight = (float) height;                           // height to calculate the ratio between height/width
         fWidth = (float) width;                             // height to calculate the ratio between height/width
         hEdgeStart = quarterWidth;                          // sliding start point of the gradient
         hEdgeLength = fWidth / fHeight;                     // length of the iterative boundary of the gradient
@@ -423,9 +424,37 @@ void generate_ppm( struct PPM_Image *ppmImage, int width, int height, char *out_
         downShade -= gradient;
     }
 
+    struct PGM_Image pgmImageRed, pgmImageGreen, pgmImageBlue;
 
+    char pgm_red_filename[100];
+    strcpy(pgm_red_filename, "Red_PGM_Copy_From_");
+    strcat(pgm_red_filename, out_filename);
+
+    char pgm_green_filename[100];
+    strcpy(pgm_green_filename, "Green_PGM_Copy_From_");
+    strcat(pgm_green_filename, out_filename);
+
+    char pgm_blue_filename[100];
+    strcpy(pgm_blue_filename, "Blue_PGM_Copy_From_");
+    strcat(pgm_blue_filename, out_filename);
+
+    create_PGM_Image( &pgmImageRed, width, height, MAX_GRAY );
+    create_PGM_Image( &pgmImageGreen, width, height, MAX_GRAY );
+    create_PGM_Image( &pgmImageBlue, width, height, MAX_GRAY );
+
+    copy_PPM_to_PGM( ppmImage, &pgmImageRed, 0);
+    copy_PPM_to_PGM( ppmImage, &pgmImageGreen, 1);
+    copy_PPM_to_PGM( ppmImage, &pgmImageBlue, 2);
+
+    save_PGM_Image( &pgmImageRed, pgm_red_filename, format);
+    save_PGM_Image( &pgmImageGreen, pgm_green_filename, format);
+    save_PGM_Image( &pgmImageBlue, pgm_blue_filename, format);
     save_PPM_Image( ppmImage, out_filename, format );
+
     free_PPM_Image( ppmImage );
+    free_PGM_Image( &pgmImageRed );
+    free_PGM_Image( &pgmImageGreen );
+    free_PGM_Image( &pgmImageBlue );
 
 }
 
