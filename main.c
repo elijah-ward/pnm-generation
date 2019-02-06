@@ -99,11 +99,13 @@ void generate_pbm( struct PBM_Image *pbmImage, int width, int height, char *out_
 
     create_PBM_Image( pbmImage, width, height );
 
+    // Determine if the image requested is height-long or width-long
     int isWide = width >= height;
     int strokeStart, strokeEnd, strokeLength;
 
     strokeStart = 0;
 
+    // Construct the white rectangle making up 1/2 total width and 1/2 total height
     for ( row = 0; row < pbmImage->height; row++ )
     {
         for ( col = 0; col < pbmImage->width; col++ )
@@ -120,10 +122,15 @@ void generate_pbm( struct PBM_Image *pbmImage, int width, int height, char *out_
         }
     }
 
+    // If image is width-long
     if ( isWide )
     {
+        // then the length of our line stroke is equal to width/height
         strokeLength = width / height;
         strokeEnd = strokeLength;
+
+        // draw the line from one corner of the image to the other
+        // while also drawing the opposite line simoultaneously
         for ( row = 0; row < pbmImage->height; row++ )
         {
             for ( col = 0; col < pbmImage->width; col++ )
@@ -140,8 +147,12 @@ void generate_pbm( struct PBM_Image *pbmImage, int width, int height, char *out_
     }
     else
     {
+        // Else it is height-long and the stroke length is equal to height/width
         strokeLength = height / width;
         strokeEnd = strokeLength;
+
+        // draw the line from one corner of the image to the other
+        // while also drawing the opposite line simoultaneously
         for ( col = 0; col < pbmImage->width; col++ )
         {
             for ( row = 0; row < pbmImage->height; row++ )
@@ -157,6 +168,7 @@ void generate_pbm( struct PBM_Image *pbmImage, int width, int height, char *out_
         }
     }
 
+    // Save image to disk and free memory
     save_PBM_Image( pbmImage, out_filename, format );
     free_PBM_Image( pbmImage );
 
@@ -179,23 +191,13 @@ void generate_pgm( struct PGM_Image *pgmImage, int width, int height, char *out_
     int quarterWidth = width / 4;
     int quarterHeight = height / 4;
     int colour = 0;
-    int longDim, shortDim;
-
-    if ( width > height )
-    {
-        longDim = width;
-        shortDim = height;
-    }
-    else
-    {
-        longDim = height;
-        shortDim = width;
-    }
 
     create_PGM_Image( pgmImage, width, height, MAX_GRAY );
 
+    // Determine if the image requested is height-long or width-long
     int isWide = width >= height;
 
+    // Construct the white rectangle making up 1/2 total width and 1/2 total height
     for ( int row = 0; row < pgmImage->height; row++ )
     {
         for ( int col = 0; col < pgmImage->width; col++ )
@@ -212,18 +214,20 @@ void generate_pgm( struct PGM_Image *pgmImage, int width, int height, char *out_
         }
     }
 
+    // If image is width-long
     if (isWide)
     {
-        // top and bottom triangles
+
         int vEdgeStart, vEdgeEnd, vEdgeLength;
         float vShade, vGradient;
 
-        vEdgeStart = quarterWidth;
-        vEdgeLength = width / height;
-        vEdgeEnd = vEdgeStart + vEdgeLength;
-        vShade = (float) MAX_GRAY;
-        vGradient = (float) MAX_GRAY / quarterHeight;
+        vEdgeStart = quarterWidth;                      // sliding start point of the gradient
+        vEdgeLength = width / height;                   // length of the iterative boundary of the gradient
+        vEdgeEnd = vEdgeStart + vEdgeLength;            // sliding end point of the gradient
+        vShade = (float) MAX_GRAY;                      // the shade of the current row/column
+        vGradient = (float) MAX_GRAY / quarterHeight;   // the amount by which the shade is incremented with each iteration
 
+        // Create the gradually darkening top/bottom triangles
         for ( int row = quarterHeight; row < (quarterHeight * 2); row++ )
         {
             for ( int col = quarterWidth; col < (quarterWidth * 2); col++ )
@@ -241,18 +245,19 @@ void generate_pgm( struct PGM_Image *pgmImage, int width, int height, char *out_
             vEdgeEnd += vEdgeLength;
         }
 
-        // left and right triangles
         float hEdgeStart, hEdgeEnd, fHeight, fWidth;
         float hShade, hGradient, hEdgeLength;
 
-        fHeight = (float) height;
-        fWidth = (float) width;
-        hEdgeStart = quarterHeight;
-        hEdgeLength = fHeight / fWidth;
-        hEdgeEnd =  hEdgeStart + hEdgeLength;
-        hShade = (float) MAX_GRAY;
-        hGradient = (float) MAX_GRAY / quarterWidth;
+        fHeight = (float) height;                       // height to calculate the ratio between height/width
+        fWidth = (float) width;                         // height to calculate the ratio between height/width
+        hEdgeStart = quarterHeight;                     // sliding start point of the gradient
+        hEdgeLength = fHeight / fWidth;                 // length of the iterative boundary of the gradient
+        hEdgeEnd =  hEdgeStart + hEdgeLength;           // sliding end point of the gradient
+        hShade = (float) MAX_GRAY;                      // the shade of the current row/column
+        hGradient = (float) MAX_GRAY / quarterWidth;    // the amount by which the shade is incremented with each iteration
 
+        // Create the gradually darkening left/right triangles by applying
+        // the same transformation but transposed
         for ( int col = quarterWidth; col < (quarterWidth * 2); col++ )
         {
             for ( int row = quarterHeight; row < (quarterHeight * 2); row++ )
@@ -272,16 +277,17 @@ void generate_pgm( struct PGM_Image *pgmImage, int width, int height, char *out_
     }
     else
     {
-        // top and bottom triangles
+        // Else if the image is width-long
         int vEdgeStart, vEdgeEnd, vEdgeLength;
         float vShade, vGradient;
 
-        vEdgeStart = quarterHeight;
-        vEdgeLength = height / width;
-        vEdgeEnd = vEdgeStart + vEdgeLength;
-        vShade = (float) MAX_GRAY;
-        vGradient = (float) MAX_GRAY / quarterWidth;
+        vEdgeStart = quarterHeight;                             // sliding start point of the gradient
+        vEdgeLength = height / width;                           // length of the iterative boundary of the gradient
+        vEdgeEnd = vEdgeStart + vEdgeLength;                    // sliding end point of the gradient
+        vShade = (float) MAX_GRAY;                              // the shade of the current row/column
+        vGradient = (float) MAX_GRAY / quarterWidth;            // the amount by which the shade is incremented with each iteration
 
+        // Create the gradually darkening top/bottom triangles
         for ( int col = quarterWidth; col < (quarterWidth * 2); col++ )
         {
             for ( int row = quarterHeight; row < (quarterHeight * 2); row++ )
@@ -299,18 +305,19 @@ void generate_pgm( struct PGM_Image *pgmImage, int width, int height, char *out_
             vEdgeEnd += vEdgeLength;
         }
 
-        // left and right triangles
         float hEdgeStart, hEdgeEnd, fHeight, fWidth;
         float hShade, hGradient, hEdgeLength;
 
-        fHeight = (float) height;
-        fWidth = (float) width;
-        hEdgeStart = quarterWidth;
-        hEdgeLength = fWidth / fHeight;
-        hEdgeEnd =  hEdgeStart + hEdgeLength;
-        hShade = (float) MAX_GRAY;
-        hGradient = (float) MAX_GRAY / quarterHeight;
+        fHeight = (float) height;                           // height to calculate the ratio between height/width    
+        fWidth = (float) width;                             // height to calculate the ratio between height/width
+        hEdgeStart = quarterWidth;                          // sliding start point of the gradient
+        hEdgeLength = fWidth / fHeight;                     // length of the iterative boundary of the gradient
+        hEdgeEnd =  hEdgeStart + hEdgeLength;               // sliding end point of the gradient
+        hShade = (float) MAX_GRAY;                          // the shade of the current row/column
+        hGradient = (float) MAX_GRAY / quarterHeight;       // the amount by which the shade is incremented with each iteration
 
+        // Create the gradually darkening left/right triangles by applying
+        // the same transformation but transposed
         for ( int row = quarterHeight; row < (quarterHeight * 2); row++ )
         {
             for ( int col = quarterWidth; col < (quarterWidth * 2); col++ )
@@ -351,12 +358,15 @@ void generate_ppm( struct PPM_Image *ppmImage, int width, int height, char *out_
 
     create_PPM_Image( ppmImage, width, height, MAX_GRAY );
 
+    // Useful dimension values
     int thirdWidth = width / 3;
     int halfWidth = width / 2;
     int halfHeight = height / 2;
 
+    // The amount by which the shades are incremented/decremented with each iteration
     float gradient = (float) MAX_GRAY / halfHeight;
 
+    // initialize component shades
     float rShade = 0;
     float gShade = MAX_GRAY;
     float bShade = 0;
@@ -444,13 +454,14 @@ int main( int argc, char **argv )
     out_filename = argv[4];
     format = atoi(argv[5]);
 
-    // INPUT VALIDATION FUNC
+    // check input against validation rules and exit if it fails
     int e = check_args(type, width, height, out_filename, format);
     if (e)
     {
         exit(0);
     }
 
+    // call the appropriate function for the requested image type
     switch(type)
     {
     case 1:
